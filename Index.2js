@@ -1,1 +1,90 @@
-hallo welt
+const { REST, Routes, SlashCommandBuilder } = require('discord.js');
+
+const commands = [
+    new SlashCommandBuilder().setName('start').setDescription('Musik starten'),
+    new SlashCommandBuilder().setName('skip').setDescription('Song überspringen'),
+    new SlashCommandBuilder().setName('stop').setDescription('Musik stoppen'),
+    new SlashCommandBuilder().setName('pause').setDescription('Musik pausieren'),
+    new SlashCommandBuilder().setName('resume').setDescription('Musik fortsetzen'),
+    new SlashCommandBuilder().setName('leave').setDescription('Bot verlassen'),
+    new SlashCommandBuilder().setName('song').setDescription('Aktuellen Song anzeigen'),
+    new SlashCommandBuilder().setName('queue').setDescription('Warteschlange anzeigen')
+].map(command => command.toJSON());
+const {
+    Client,
+    GatewayIntentBits,
+    Events
+} = require('discord.js');
+
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates
+    ]
+});
+
+const OWNER_ID = process.env.OWNER_ID;
+
+client.once(Events.ClientReady, () => {
+    console.log(`Bot ist online als ${client.user.tag}!`);
+});
+
+client.on(Events.InteractionCreate, async interaction => {
+    if (!interaction.isChatInputCommand()) return;
+
+    const command = interaction.commandName;
+
+    // Nur der Server-Owner darf diese Befehle benutzen
+    const ownerCommands = [
+        'start',
+        'skip',
+        'stop',
+        'pause',
+        'resume',
+        'leave'
+    ];
+
+    if (
+        ownerCommands.includes(command) &&
+        interaction.user.id !== OWNER_ID
+    ) {
+        return interaction.reply({
+            content: 'Du darfst diesen Befehl nicht benutzen!',
+            ephemeral: true
+        });
+    }
+
+    if (command === 'start') {
+        await interaction.reply('🎵 Musikstart wird vorbereitet!');
+    }
+
+    else if (command === 'skip') {
+        await interaction.reply('⏭️ Überspringen wird vorbereitet!');
+    }
+
+    else if (command === 'stop') {
+        await interaction.reply('⏹️ Stoppen wird vorbereitet!');
+    }
+
+    else if (command === 'pause') {
+        await interaction.reply('⏸️ Pausieren wird vorbereitet!');
+    }
+
+    else if (command === 'resume') {
+        await interaction.reply('▶️ Fortsetzen wird vorbereitet!');
+    }
+
+    else if (command === 'leave') {
+        await interaction.reply('👋 Verlassen wird vorbereitet!');
+    }
+
+    else if (command === 'song') {
+        await interaction.reply('🎵 Aktuell ist noch kein Song aktiv.');
+    }
+
+    else if (command === 'queue') {
+        await interaction.reply('📜 Die Warteschlange ist noch leer.');
+    }
+});
+
+client.login(process.env.DISCORD_TOKEN);
